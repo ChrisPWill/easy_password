@@ -1,7 +1,8 @@
 use bcrypt::{hash, verify, BcryptError};
-use hmac::{crypto_mac::InvalidKeyLength, Hmac, Mac, NewMac};
-use sha2::Sha256;
 use std::fmt::Write;
+use hmac::{Hmac, Mac};
+use sha2::digest::InvalidLength;
+use sha2::Sha256;
 
 #[derive(Debug, PartialEq)]
 pub enum PasswordError {
@@ -13,7 +14,7 @@ pub enum PasswordError {
 fn hmac_password(
     password: &str,
     hmac_key: &[u8],
-) -> Result<String, InvalidKeyLength> {
+) -> Result<String, InvalidLength> {
     let mut mac = Hmac::<Sha256>::new_from_slice(hmac_key)?;
     mac.update(password.as_bytes());
     let result = mac.finalize().into_bytes();
@@ -40,7 +41,7 @@ pub fn hash_password(
 ) -> Result<String, PasswordError> {
     let hmac_hex = match hmac_password(password, hmac_key) {
         Ok(result) => result,
-        Err(InvalidKeyLength) => {
+        Err(InvalidLength) => {
             return Err(PasswordError::InvalidKeyLength);
         }
     };
@@ -73,7 +74,7 @@ pub fn verify_password(
 ) -> Result<bool, PasswordError> {
     let hmac_hex = match hmac_password(password, hmac_key) {
         Ok(result) => result,
-        Err(InvalidKeyLength) => {
+        Err(InvalidLength) => {
             return Err(PasswordError::InvalidKeyLength);
         }
     };
