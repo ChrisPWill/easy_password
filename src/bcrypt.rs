@@ -1,8 +1,7 @@
 use bcrypt::{hash, verify, BcryptError};
-use std::fmt::Write;
 use hmac::{Hmac, Mac};
-use sha2::digest::InvalidLength;
-use sha2::Sha256;
+use sha2::{digest::InvalidLength, Sha256};
+use std::fmt::Write;
 
 #[derive(Debug, PartialEq)]
 pub enum PasswordError {
@@ -98,16 +97,20 @@ mod tests {
     fn test_verify_correct() {
         let hash = hash_password("test_password", b"my_key", 4)
             .expect("This should be a valid cost and hmac_key");
-        assert!(verify_password("test_password", hash.as_str(), b"my_key")
-            .expect("Hash and hmac_key should be valid."));
+        assert!(
+            verify_password("test_password", hash.as_str(), b"my_key")
+                .expect("Hash and hmac_key should be valid.")
+        );
     }
 
     #[test]
     fn test_verify_incorrect() {
         let hash = hash_password("test_password", b"my_key", 4)
             .expect("This should be a valid cost and hmac_key");
-        assert!(!verify_password("wrong_password", hash.as_str(), b"my_key")
-            .expect("Hash and hmac_key should be valid."));
+        assert!(
+            !verify_password("wrong_password", hash.as_str(), b"my_key")
+                .expect("Hash and hmac_key should be valid.")
+        );
     }
 
     #[test]
