@@ -1,12 +1,6 @@
-extern crate bcrypt;
-extern crate hmac;
-extern crate sha2;
-
-use self::{
-    bcrypt::{hash, verify, BcryptError},
-    hmac::{crypto_mac::InvalidKeyLength, Hmac, Mac},
-    sha2::Sha256,
-};
+use bcrypt::{hash, verify, BcryptError};
+use hmac::{crypto_mac::InvalidKeyLength, Hmac, Mac, NewMac};
+use sha2::Sha256;
 use std::fmt::Write;
 
 #[derive(Debug, PartialEq)]
@@ -20,9 +14,9 @@ fn hmac_password(
     password: &str,
     hmac_key: &[u8],
 ) -> Result<String, InvalidKeyLength> {
-    let mut mac = Hmac::<Sha256>::new_varkey(hmac_key)?;
-    mac.input(password.as_bytes());
-    let result = mac.result().code();
+    let mut mac = Hmac::<Sha256>::new_from_slice(hmac_key)?;
+    mac.update(password.as_bytes());
+    let result = mac.finalize().into_bytes();
     let mut result_hex = String::new();
     write!(&mut result_hex, "{:x}", result)
         .expect("The Hmac result should convert to hex.");
@@ -103,20 +97,16 @@ mod tests {
     fn test_verify_correct() {
         let hash = hash_password("test_password", b"my_key", 4)
             .expect("This should be a valid cost and hmac_key");
-        assert!(
-            verify_password("test_password", hash.as_str(), b"my_key")
-                .expect("Hash and hmac_key should be valid.")
-        );
+        assert!(verify_password("test_password", hash.as_str(), b"my_key")
+            .expect("Hash and hmac_key should be valid."));
     }
 
     #[test]
     fn test_verify_incorrect() {
         let hash = hash_password("test_password", b"my_key", 4)
             .expect("This should be a valid cost and hmac_key");
-        assert!(
-            !verify_password("wrong_password", hash.as_str(), b"my_key")
-                .expect("Hash and hmac_key should be valid.")
-        );
+        assert!(!verify_password("wrong_password", hash.as_str(), b"my_key")
+            .expect("Hash and hmac_key should be valid."));
     }
 
     #[test]

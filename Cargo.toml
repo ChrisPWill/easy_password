@@ -8,8 +8,10 @@ readme = "README.md"
 keywords = ["bcrypt", "password", "hash"]
 repository = "https://github.com/ChrisPWill/easy_password"
 homepage = "https://github.com/ChrisPWill/easy_password"
+edition="2018"
 
 [dependencies]
-hmac = "0.7.1"
-sha2 = "0.8.0"
-bcrypt = "0.5.0"
+hmac = "0.11"
+sha2 = "0.9"
+bcrypt = "0.10"
+
