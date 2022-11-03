@@ -1,6 +1,6 @@
 [package]
 name = "easy_password"
-version = "0.1.2"
+version = "0.1.3"
 authors = ["Chris Williams <chrispwill@gmail.com>"]
 description = "Easy password hashing (includes bcrypt)"
 license = "MIT"
