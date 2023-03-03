@@ -18,7 +18,7 @@ fn hmac_password(
     mac.update(password.as_bytes());
     let result = mac.finalize().into_bytes();
     let mut result_hex = String::new();
-    write!(&mut result_hex, "{:x}", result)
+    write!(&mut result_hex, "{result:x}")
         .expect("The Hmac result should convert to hex.");
     Ok(result_hex)
 }
