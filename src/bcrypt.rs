@@ -3,7 +3,7 @@ use hmac::{Hmac, Mac};
 use sha2::{digest::InvalidLength, Sha256};
 use std::fmt::Write;
 
-#[derive(Debug, PartialEq)]
+#[derive(Debug, Eq, PartialEq)]
 pub enum PasswordError {
     InvalidKeyLength,
     CostNotAllowed(u32),
@@ -33,6 +33,13 @@ fn hmac_password(
 ///
 /// let hash = hash_password("my_password", b"secure_key", 12).unwrap();
 /// ```
+///
+/// # Errors
+/// Will throw an error if an invalid cost (`bcrypt_rounds`) is provided to the function.
+///
+/// # Panics
+/// Will panic if invalid data is provided to the underlying `bcrypt` library. This would be a bug
+/// `easy_password` as it should provide the correct information by default.
 pub fn hash_password(
     password: &str,
     hmac_key: &[u8],
@@ -66,6 +73,14 @@ pub fn hash_password(
 /// let result =
 ///     verify_password("my_password", hash.as_str(), b"secure_key").unwrap();
 /// ```
+///
+/// # Errors
+/// Will throw an error if an invalid hashed password is provided to the function.
+///
+/// # Panics
+/// Will panic if otherwise invalid data is provided to the underlying `bcrypt` library. This would
+/// be a bug in `easy_password` as it should provide the correct information besides the error(s)
+/// outlined above.
 pub fn verify_password(
     password: &str,
     hashed: &str,
@@ -79,12 +94,12 @@ pub fn verify_password(
     };
     match verify(hmac_hex.as_str(), hashed) {
         Ok(bool) => Ok(bool),
-        Err(BcryptError::InvalidCost(_))
-        | Err(BcryptError::InvalidPrefix(_))
-        | Err(BcryptError::InvalidHash(_))
-        | Err(BcryptError::InvalidBase64(..)) => {
-            Err(PasswordError::InvalidHash(hashed.to_string()))
-        }
+        Err(
+            BcryptError::InvalidCost(_)
+            | BcryptError::InvalidPrefix(_)
+            | BcryptError::InvalidHash(_)
+            | BcryptError::InvalidBase64(..),
+        ) => Err(PasswordError::InvalidHash(hashed.to_string())),
         Err(error) => panic!("Unexpected Bcrypt error {}.", error),
     }
 }
@@ -97,20 +112,16 @@ mod tests {
     fn test_verify_correct() {
         let hash = hash_password("test_password", b"my_key", 4)
             .expect("This should be a valid cost and hmac_key");
-        assert!(
-            verify_password("test_password", hash.as_str(), b"my_key")
-                .expect("Hash and hmac_key should be valid.")
-        );
+        assert!(verify_password("test_password", hash.as_str(), b"my_key")
+            .expect("Hash and hmac_key should be valid."));
     }
 
     #[test]
     fn test_verify_incorrect() {
         let hash = hash_password("test_password", b"my_key", 4)
             .expect("This should be a valid cost and hmac_key");
-        assert!(
-            !verify_password("wrong_password", hash.as_str(), b"my_key")
-                .expect("Hash and hmac_key should be valid.")
-        );
+        assert!(!verify_password("wrong_password", hash.as_str(), b"my_key")
+            .expect("Hash and hmac_key should be valid."));
     }
 
     #[test]
