@@ -1,6 +1,6 @@
-use bcrypt::{hash, verify, BcryptError};
+use bcrypt::{BcryptError, hash, verify};
 use hmac::{Hmac, Mac};
-use sha2::{digest::InvalidLength, Sha256};
+use sha2::{Sha256, digest::InvalidLength};
 use std::fmt::Write;
 
 #[derive(Debug, Eq, PartialEq)]
@@ -94,12 +94,9 @@ pub fn verify_password(
     };
     match verify(hmac_hex.as_str(), hashed) {
         Ok(bool) => Ok(bool),
-        Err(
-            BcryptError::InvalidCost(_)
-            | BcryptError::InvalidPrefix(_)
-            | BcryptError::InvalidHash(_)
-            | BcryptError::InvalidBase64(..),
-        ) => Err(PasswordError::InvalidHash(hashed.to_string())),
+        Err(BcryptError::CostNotAllowed(_) | BcryptError::InvalidHash(_)) => {
+            Err(PasswordError::InvalidHash(hashed.to_string()))
+        }
         Err(error) => panic!("Unexpected Bcrypt error {}.", error),
     }
 }
@@ -112,16 +109,20 @@ mod tests {
     fn test_verify_correct() {
         let hash = hash_password("test_password", b"my_key", 4)
             .expect("This should be a valid cost and hmac_key");
-        assert!(verify_password("test_password", hash.as_str(), b"my_key")
-            .expect("Hash and hmac_key should be valid."));
+        assert!(
+            verify_password("test_password", hash.as_str(), b"my_key")
+                .expect("Hash and hmac_key should be valid.")
+        );
     }
 
     #[test]
     fn test_verify_incorrect() {
         let hash = hash_password("test_password", b"my_key", 4)
             .expect("This should be a valid cost and hmac_key");
-        assert!(!verify_password("wrong_password", hash.as_str(), b"my_key")
-            .expect("Hash and hmac_key should be valid."));
+        assert!(
+            !verify_password("wrong_password", hash.as_str(), b"my_key")
+                .expect("Hash and hmac_key should be valid.")
+        );
     }
 
     #[test]
