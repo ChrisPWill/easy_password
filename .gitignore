@@ -1,5 +1,8 @@
 /target
 **/*.rs.bk
-Cargo.lock
+# Committing Cargo.lock for reproducible crane builds
+# Cargo.lock
 .*.swp
 .idea
+
+.direnv/
