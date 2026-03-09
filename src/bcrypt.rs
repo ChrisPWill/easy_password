@@ -31,6 +31,7 @@ fn hmac_password(
 /// ```
 /// use easy_password::bcrypt::hash_password;
 ///
+/// // Store this in your DB
 /// let hash = hash_password("my_password", b"secure_key", 12).unwrap();
 /// ```
 ///
@@ -69,7 +70,9 @@ pub fn hash_password(
 /// ```
 /// use easy_password::bcrypt::{hash_password, verify_password};
 ///
+/// // Store hash in your DB, retrieve later
 /// let hash = hash_password("my_password", b"secure_key", 12).unwrap();
+/// // After retrieving, check against user's password
 /// let result =
 ///     verify_password("my_password", hash.as_str(), b"secure_key").unwrap();
 /// ```
