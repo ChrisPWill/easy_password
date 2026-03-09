@@ -1,6 +1,6 @@
 [package]
 name = "easy_password"
-version = "0.1.4"
+version = "0.1.5"
 authors = ["Chris Williams <chrispwill@gmail.com>"]
 description = "Easy password hashing (includes bcrypt)"
 license = "MIT"
@@ -8,7 +8,7 @@ readme = "README.md"
 keywords = ["bcrypt", "password", "hash"]
 repository = "https://github.com/ChrisPWill/easy_password"
 homepage = "https://github.com/ChrisPWill/easy_password"
-edition="2018"
+edition = "2018"
 
 [dependencies]
 hmac = "0.12.1"
