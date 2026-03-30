@@ -11,6 +11,6 @@ homepage = "https://github.com/ChrisPWill/easy_password"
 edition = "2018"
 
 [dependencies]
-hmac = "0.12.1"
-sha2 = "0.10.8"
+hmac = "0.13.0"
+sha2 = "0.11.0"
 bcrypt = "0.19.0"
