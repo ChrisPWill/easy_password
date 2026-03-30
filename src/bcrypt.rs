@@ -1,5 +1,5 @@
 use bcrypt::{BcryptError, hash, verify};
-use hmac::{Hmac, Mac};
+use hmac::{Hmac, Mac, KeyInit};
 use sha2::{Sha256, digest::InvalidLength};
 use std::fmt::Write;
 
@@ -18,8 +18,10 @@ fn hmac_password(
     mac.update(password.as_bytes());
     let result = mac.finalize().into_bytes();
     let mut result_hex = String::new();
-    write!(&mut result_hex, "{result:x}")
-        .expect("The Hmac result should convert to hex.");
+    for byte in result {
+        write!(&mut result_hex, "{byte:02x}")
+            .expect("The Hmac result should convert to hex.");
+    }
     Ok(result_hex)
 }
 
